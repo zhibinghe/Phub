@@ -1,16 +1,17 @@
 #' Modified EM algorithm for hub model component selection
 #'
-#' @param G  Observed group data, a T*n matrix
-#' @param A  M*n matrix containg correlation among nodes; first row is the nonleader case
-#' @param rho M-dimensional vector composed of component weight; prior probability of components.
-#' @param lam tunning parameter for component selection, lambda*Df
+#' @param G  observed group data, a T*n matrix
+#' @param A  a matrix containg correlation among nodes; first row is the nonleader case
+#' @param rho a vector composed of component weight; prior probability of components.
+#' @param lam tuning parameter for component selection, lambda*Df; if lam=0, becomes a normal EM without penalty
 #' @param iter maximum iteration steps
+#' @param tol tolerated chnage for log-likelihood
 
 #' @return a list of components
-#' \item{A}{M*n matrix containg estimated correlation among nodes}
-#' \item{rho}{M-dimensional vector containing estimated component weight}
-#' \item{l}{loglikelihood}
-#' \item{iteration}{number of iteration steps used to converge}
+#' \item{A}{a matrix containg estimated correlation among nodes}
+#' \item{rho}{a vector containing estimated component weight}
+#' \item{l}{log-likelihood}
+#' \item{iteration}{number of iterations used to converge}
 #' @export
 #'
 #' @examples
@@ -20,10 +21,9 @@
 #' M = 11
 #' A = matrix(runif(M*n),nrow=M); diag(A[-1,])=1
 #' rho = runif(M); rho = rho/sum(rho)
-#' pi = colMeans(G0)
 #' EM.hub(G0,A,rho,0.03)
 #'
-EM.hub = function(G,A,rho,lam,iter=1000){
+EM.hub = function(G,A,rho,lam,iter=1000,tol=0.01){
   ## f(G(t)|Z(t)=k,A)
   cond.f = function(G,A){
     T = dim(G)[1]; M = dim(A)[1]
@@ -62,7 +62,7 @@ EM.hub = function(G,A,rho,lam,iter=1000){
   ## EM Iteration
   count = 0;diff = 1
   L = vector();L[1] = 1
-  while((count < iter & diff > 10^(-6))){
+  while((count < iter & diff > tol)){
     count = count + 1
     # E Step
     post = posterior(rho,cond.f(G,A))
@@ -74,8 +74,13 @@ EM.hub = function(G,A,rho,lam,iter=1000){
     rho = hatrho(H,Mi,lam)
     if(all(rho==0)) break
     A = hatA(G,H)
-    diff = abs((L[count+1]-L[count])/L[count])
+    diff = abs(L[count+1]-L[count])
   }
+  if(L[count+1]==-Inf) warning("The final log-likelihood is -Inf in fact")
+  ## delete rho when too small
+  thres = 0.05
+  A[(rho<thres),] = 0
+  rho[rho<thres] = 0
   return(list(A=A,rho=rho,l=L[count+1],iteration=count))
 }
 

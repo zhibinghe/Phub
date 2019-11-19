@@ -1,0 +1,34 @@
+library(Phub)
+
+## Generate simulation data
+n0 = 5 # number of true leaders
+n=100 # number of total nodes
+A0 = GenA(100,n0,0.4,0.1,rep(0.05,n)) # true adjacent matrix
+G0 = GenG(A0,1000,c(0.2,rep(0.8/n0,n0))) # observed data
+
+## Testing EM.hub
+M = 11 # number of initial components
+A = matrix(runif(M*n),nrow=M); diag(A[-1,])=1 # initial A matrix
+rho = runif(M); rho = rho/sum(rho) # initial component weights
+EM.hub(G0,A,rho,0.05) # EM estimation
+
+## Testing EMM.hub
+M = 10
+EMM.hub(G0,M,0.04) # EM with multiple start points
+M = 20
+EMM.hub(G0,M,0.035)
+
+## Tesing selection of lambda using BIC
+vlam = seq(0.011,0.099,0.01)
+T = dim(G0)[1] # sample size
+n = dim(G0)[2]
+out = vector("list",length=length(vlam))
+vbic = vl = rep(NA,length(vlam))
+for(i in 1:length(vlam)){
+  lam = vlam[i]
+  out[[i]] = EMM.hub(G0,M=20,lam)
+  # BIC
+  Mi = sum(out[[i]]$rho!=0)
+  vbic[i] = out[[i]]$l - 0.5*log(T)*(n*Mi-Mi+1)
+}
+out[[which.max(vbic)]]

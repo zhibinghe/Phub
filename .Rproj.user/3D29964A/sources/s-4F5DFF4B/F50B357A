@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1574044703769.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "F50B357A",
+    "lastKnownWriteTime" : 1574034652,
+    "last_content_update" : 1574034652,
+    "path" : "~/Documents/R/Phub/R/EMM.R",
+    "project_path" : "R/EMM.R",
+    "properties" : {
+        "cursorPosition" : "37,24",
+        "scrollLine" : "21",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
