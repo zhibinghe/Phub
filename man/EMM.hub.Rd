@@ -4,7 +4,8 @@
 \alias{EMM.hub}
 \title{Multiple initial points (rho) version of function \code{\link{EM.hub}} (Deprecated now)}
 \usage{
-EMM.hub(G, M, lam, iter = 1000, tol = 0.01)
+EMM.hub(G, M, lam, rep = 10, nohub = TRUE, iter = 1000,
+  tol = 10^(-6))
 }
 \arguments{
 \item{G}{observed group data, a T*n matrix}
@@ -13,9 +14,13 @@ EMM.hub(G, M, lam, iter = 1000, tol = 0.01)
 
 \item{lam}{tuning parameter for component selection, lambda*Df; if lam=0, becomes a normal EM without penalty}
 
+\item{rep}{repeatation}
+
+\item{nohub}{True/False indicates if rho0 should be penalized}
+
 \item{iter}{maximum iteration steps}
 
-\item{tol}{tolerated chnage for log-likelihood}
+\item{tol}{tolerated}
 }
 \value{
 a list of components
@@ -31,8 +36,8 @@ Multiple initial points (rho) version of function \code{\link{EM.hub}} (Deprecat
 n0 = 5; n=100
 A0 = GenA(100,n0,0.4,0.1,rep(0.05,n))
 G0 = GenG(A0,1000,c(0.2,rep(0.8/n0,n0)))
-M = 10; EMM.hub(G0,M,0.04)
-M = 20; EMM.hub(G0,M,0.035)
+M = 10; EMM.hub(G0,M,0.045)$rho
+M = 20; EMM.hub(G0,M,0.035)$rho
 \donttest{M = 50; EMM.hub(G0,M,0.019)}
 
 }

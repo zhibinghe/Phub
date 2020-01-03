@@ -1,19 +1,19 @@
 {
     "collab_server" : "",
     "contents" : "",
-    "created" : 1574144889193.000,
+    "created" : 1578032006671.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "0",
-    "id" : "C8E03D8A",
-    "lastKnownWriteTime" : 1574053574,
-    "last_content_update" : 1574053574,
-    "path" : "~/Desktop/runing/test.R",
+    "hash" : "2085976559",
+    "id" : "64619549",
+    "lastKnownWriteTime" : 1578030727,
+    "last_content_update" : 1578030727,
+    "path" : "~/Documents/R/EM_opt.R",
     "project_path" : null,
     "properties" : {
-        "cursorPosition" : "49,0",
-        "scrollLine" : "41"
+        "cursorPosition" : "50,0",
+        "scrollLine" : "48"
     },
     "relative_order" : 4,
     "source_on_save" : false,

@@ -4,7 +4,7 @@
 \alias{EM.hub}
 \title{Modified EM algorithm for hub model component selection}
 \usage{
-EM.hub(G, A, rho, lam, iter = 1000, tol = 0.01)
+EM.hub(G, A, rho, lam, nohub = TRUE, iter = 1000, tol = 10^(-6))
 }
 \arguments{
 \item{G}{observed group data, a T*n matrix}
@@ -15,9 +15,11 @@ EM.hub(G, A, rho, lam, iter = 1000, tol = 0.01)
 
 \item{lam}{tuning parameter for component selection, lambda*Df; if lam=0, becomes a normal EM without penalty}
 
+\item{nohub}{True/False indicates if rho0 should be penalized}
+
 \item{iter}{maximum iteration steps}
 
-\item{tol}{tolerated chnage for log-likelihood}
+\item{tol}{tolerated}
 }
 \value{
 a list of components
@@ -33,9 +35,9 @@ Modified EM algorithm for hub model component selection
 n0 = 5; n=100
 A0 = GenA(100,n0,0.4,0.1,rep(0.05,n))
 G0 = GenG(A0,1000,c(0.2,rep(0.8/n0,n0)))
-M = 11
-A = matrix(runif(M*n),nrow=M); diag(A[-1,])=1
-rho = runif(M); rho = rho/sum(rho)
-EM.hub(G0,A,rho,0.03)
+M = 10
+A = matrix(runif((M+1)*n),nrow=(M+1)); diag(A[-1,])=1
+rho = runif(M+1); rho = rho/sum(rho)
+EM.hub(G0,A,rho,0.045)$rho
 
 }

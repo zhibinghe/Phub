@@ -1,6 +1,0 @@
-testf = function(x){
-  if(x==10) stop("this number cannot be 10")
-  print("ok")
-  return(x)
-}
-for(i in 20) testf(i)

@@ -1,2 +1,0 @@
-# Phub
-Penalized Hub Moldel

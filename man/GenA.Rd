@@ -9,7 +9,7 @@ GenA(n, n0, pf, pr, pi)
 \arguments{
 \item{n}{number of nodes}
 
-\item{n0}{number of true hub nodes}
+\item{n0}{number of true nonzero components}
 
 \item{pf}{probability of following}
 

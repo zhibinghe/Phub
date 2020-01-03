@@ -1,7 +1,7 @@
 #' Simulate a simple pattern 'Adjacent matrix'
 #'
 #' @param n  number of nodes
-#' @param n0  number of true hub nodes
+#' @param n0  number of true nonzero components
 #' @param pi a n-dimensional vector containg the probability of appearance in nonleader group
 #' @param pf probability of following
 #' @param pr probality of rejection

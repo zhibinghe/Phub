@@ -1,12 +1,11 @@
-#' Modified EM algorithm for hub model component selection
+#' EM nested with lasso algorithm for hub model component selection
 #'
 #' @param G  observed group data, a T*n matrix
 #' @param A  a matrix containg correlation among nodes; first row is the nonleader case
 #' @param rho a vector composed of component weight; prior probability of components.
 #' @param lam tuning parameter for component selection, lambda*Df; if lam=0, becomes a normal EM without penalty
-#' @param nohub True/False indicates if rho0 should be penalized
 #' @param iter maximum iteration steps
-#' @param tol tolerated
+#' @param tol tolerated chnage for log-likelihood
 
 #' @return a list of components
 #' \item{A}{a matrix containg estimated correlation among nodes}
@@ -22,9 +21,11 @@
 #' M = 10
 #' A = matrix(runif((M+1)*n),nrow=(M+1)); diag(A[-1,])=1
 #' rho = runif(M+1); rho = rho/sum(rho)
-#' EM.hub(G0,A,rho,0.045)$rho
+#' EM.lasso(G0,A,rho,50)$rho
 #'
-EM.hub = function(G,A,rho,lam,nohub=TRUE,iter=1000,tol=10^(-6)){
+library(Phub)
+library(Rsolnp)
+EM.lasso = function(G,A,rho,lam,iter=1000,tol=10^(-4)){
   ## f(G(t)|Z(t)=k,A)
   cond.f = function(G,A){
     T = dim(G)[1]; q = dim(A)[1]
@@ -41,12 +42,18 @@ EM.hub = function(G,A,rho,lam,nohub=TRUE,iter=1000,tol=10^(-6)){
     loglik = sum(log(rowSums(Htm)))
     return(list(H=H,l=loglik))
   }
-  ## update rho: some rho will shrink to 0
-  hatrho = function(H,Mi,lam){
-    temp = sapply((colMeans(H) - lam)/(1-Mi*lam),function(x) max(0,x))
-    # whether to penalized rho0
-    if(nohub==TRUE) temp[1] = mean(H[,1])/(1-Mi*lam)
-    return(temp)
+  ## update rho: some rho may shrink to 0
+  hatrho = function(x,Hx){
+    # Hx: colSums of H
+    T = dim(G)[1]
+    ind = which(x!=0)
+    ft = function(t) -sum(Hx[ind]*log(t)) + T*lam*(1-rho[1])
+    eqft = function(t) sum(t)
+    len = length(ind)
+    pars = gosolnp(fun=ft,eqfun=eqft,eqB=1,LB=rep(0,len),UB=rep(1,len),control=list(trace=0),n.restarts=1)$pars
+    pars[pars<tol] = 0
+    x[ind] = pars
+    return(x)
   }
   ## update A: Am. will be 0 if rho_m=0
   hatA = function(G,H){
@@ -70,19 +77,9 @@ EM.hub = function(G,A,rho,lam,nohub=TRUE,iter=1000,tol=10^(-6)){
     L[count+1] = post$l
     if(is.infinite(L[count+1])) break
     # M Step
-    Mi = sum(rho!=0)
-    if(Mi*lam==1) stop("Please input a new lam avoiding 1-M*lam is 0")
-    rho = hatrho(H,Mi,lam)
+    rho = hatrho(rho,colSums(H))
     A = hatA(G,H)
     diff = abs(L[count+1]-L[count])
   }
-  ## delete rho when too small
-  A[(rho<tol),] = 0
-  rho[rho<tol] = 0
   return(list(A=A,rho=rho,l=L[count+1],iteration=count))
 }
-
-
-
-
-
