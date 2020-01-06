@@ -1,0 +1,11 @@
+## scenario #1
+n0 = 10; n=100; T=1000
+A0 = GenA(100,n0,0.4,0.1,rep(0.05,n))
+G0 = GenG(A0,T,c(0.2,rep(0.8/n0,n0)))
+M = 10; mphub(G0,M,0.023)$rho
+Iter = 100
+cl = parallel::makeCluster(c)
+doParallel::registerDoParallel(cl)
+out = foreach::foreach(r=Iter,.combine='cbind',.packages="Phub") %dopar% 
+               mphub(G0,M,0.023)$rho
+parallel::stopCluster(cl)

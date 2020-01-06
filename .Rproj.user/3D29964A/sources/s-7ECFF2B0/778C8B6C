@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1578270436984.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "778C8B6C",
+    "lastKnownWriteTime" : 1569523178,
+    "last_content_update" : 1569523178,
+    "path" : "~/Documents/R/ChangePoint/R/fdr_gam.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "33,77",
+        "scrollLine" : "28"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
