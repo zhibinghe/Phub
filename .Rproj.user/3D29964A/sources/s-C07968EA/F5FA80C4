@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1578420617789.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "F5FA80C4",
+    "lastKnownWriteTime" : 1579392579,
+    "last_content_update" : 1579392579455,
+    "path" : "~/Documents/R/Phub/tpr.R",
+    "project_path" : "tpr.R",
+    "properties" : {
+        "cursorPosition" : "7,23",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

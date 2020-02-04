@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3740070632",
+    "hash" : "3194500994",
     "id" : "2EF89900",
-    "lastKnownWriteTime" : 1578270389,
-    "last_content_update" : 1578270389340,
+    "lastKnownWriteTime" : 1580778358,
+    "last_content_update" : 1580778358386,
     "path" : "~/Documents/R/Phub/R/Main.R",
     "project_path" : "R/Main.R",
     "properties" : {
-        "cursorPosition" : "23,9",
-        "scrollLine" : "18"
+        "cursorPosition" : "105,20",
+        "scrollLine" : "87"
     },
     "relative_order" : 3,
     "source_on_save" : false,

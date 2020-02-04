@@ -1,9 +1,0 @@
-
-phub = function(G,A,rho,lam,iter=1000,tol=0.05){
-  # A rho is not required
-
-
-
-
-
-}

@@ -1,0 +1,32 @@
+n0 = 10; n=100
+A0 = GenA(100,n0,0.4,0.1,rep(0.05,n))
+# GenA = function(n,n0,pi){
+#   A = matrix(NA,n0,n)
+#   A_lab = vector("list",n0)
+#   # set of followers except hub itself
+#   for(i in 1:n0) A_lab[[i]] = seq(n0+i,n,n0)
+#   for(i in 1:n0){
+#     A[i,A_lab[[i]]] = runif(length(A_lab[[i]]),min=0.2,max=0.4)
+#     A[i,-A_lab[[i]]] = runif(n-length(A_lab[[i]]),min=0,max=0.2)
+#   }
+#   diag(A) = 1
+#   return(rbind(pi,A))
+# }
+A0=GenA(n,n0,rep(0.05,n))
+G0 = GenG(A0,1000,c(0.2,rep(0.8/n0,n0)))
+M = 80
+cat("Now checking scenario 1: ","M=",M,"\n")
+## initial A
+A = matrix(NA,M,n)
+for(i in 1:M)A[i,] = colSums(G0[,i]*G0)/sum(G0[,i])
+diag(A) = 1; A = rbind(runif(n),A)
+## initial rho
+rho = c(0.2,rep(0.8/M,M))
+ts1 = phub(G0,A,rho,0,pen.type="log")$rho
+ts2 = phub(G0,A,rho,0.014,pen.type="plog")$rho
+cbind(ts1,ts2)
+# 0.012 for n0=20
+
+## 0.4-0.2 pf
+## 0.2-0.0 pr
+## 

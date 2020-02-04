@@ -35,13 +35,13 @@ a list of components
 Modified EM algorithm for hub model component selection
 }
 \examples{
-n0 = 5; n=100
+n0 = 5; n=100; T=1000
 A0 = GenA(100,n0,0.4,0.1,rep(0.05,n))
-G0 = GenG(A0,1000,c(0.2,rep(0.8/n0,n0)))
-M = 10
+G0 = GenG(A0,T,c(0.2,rep(0.8/n0,n0)))
+M = 8
 A = matrix(runif((M+1)*n),nrow=(M+1)); diag(A[-1,])=1
 rho = runif(M+1); rho = rho/sum(rho)
-phub(G0,A,rho,0.04,pen.type="log")$rho
-phub(G0,A,rho,0.04,pen.type="plog")$rho
+phub(G0,A,rho,0.035,pen.type="log")$rho
+phub(G0,A,rho,0.035,pen.type="plog")$rho
 phub(G0,A,rho,0.08,pen.type="plasso")$rho
 }

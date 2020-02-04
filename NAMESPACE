@@ -5,6 +5,3 @@ export(GenG)
 export(mphub)
 export(phub)
 import(Rsolnp)
-
-importFrom("stats", "rbinom", "runif")
-importFrom("utils", "tail")

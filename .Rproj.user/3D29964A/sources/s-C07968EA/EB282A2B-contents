@@ -1,0 +1,33 @@
+## scenario #1
+library(Phub)
+n0 = 10; n=100; T=1000
+A0 = GenA(n,n0,0.4,0.1,rep(0.05,n))
+G0 = GenG(A0,T,c(0.2,rep(0.8/n0,n0)))
+M = 90
+# initial A
+A = matrix(NA,M,n)
+for(i in 1:M)A[i,] = colSums(G0[,i]*G0)/sum(G0[,i])
+diag(A) = 1; A = rbind(runif(n),A)
+# intial rho
+rho = c(0.2,rep(0.8/M,M))
+phub(G0,A,rho,0,pen.type="plog")$rho
+
+Iter = 100
+c = 50 # number of cpu cores
+cl = parallel::makeCluster(c)
+doParallel::registerDoParallel(cl)
+out = foreach::foreach(r=1:Iter,.combine='cbind',.packages="Phub") %dopar% {
+  A0 = GenA(100,n0,0.4,0.1,rep(0.05,n))
+  G0 = GenG(A0,T,c(0.2,rep(0.8/n0,n0)))
+  mphub(G0,M,0.023)$rho
+}
+parallel::stopCluster(cl)
+write.table(out,"scenario1.txt",sep="\t",row.names=FALSE)
+
+
+
+
+
+
+
+

@@ -18,14 +18,14 @@
 #' @export
 #' @import Rsolnp
 #' @examples
-#' n0 = 10; n=100; T=1000
+#' n0 = 5; n=100; T=1000
 #' A0 = GenA(100,n0,0.4,0.1,rep(0.05,n))
-#' G0 = GenG(A0,T,c(0.1,rep(0.9/n0,n0)))
-#' M = 15
+#' G0 = GenG(A0,T,c(0.2,rep(0.8/n0,n0)))
+#' M = 8
 #' A = matrix(runif((M+1)*n),nrow=(M+1)); diag(A[-1,])=1
 #' rho = runif(M+1); rho = rho/sum(rho)
-#' phub(G0,A,rho,0.04,pen.type="log")$rho
-#' phub(G0,A,rho,0.015,pen.type="plog")$rho
+#' phub(G0,A,rho,0.035,pen.type="log")$rho
+#' phub(G0,A,rho,0.035,pen.type="plog")$rho
 #' phub(G0,A,rho,0.08,pen.type="plasso")$rho
 phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=1e-4){
   ## f(G(t)|Z(t)=k,A)
@@ -66,18 +66,20 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
                        UB=rep(1,len),control=list(trace=0))$pars
       }
       else{
-        epsi = 1e-6
+        epsi = 1e-8
         ans = list()
         ft = function(t) -sum(Hx[ind]*log(t)) + T*lam*sum(log(epsi+t[-1]))
         fun = function(i){
-          par = runif(len); par = par/sum(par) # normalized
+          if(i==1) par = rho[ind]
+          else {par = runif(len); par = par/sum(par)} # normalized
           sol = Rsolnp::solnp(pars=par,fun=ft,eqfun=eqft,eqB=1,LB=rep(0,len),
                         UB=rep(1,len),control=list(trace=0))
           ans$pars = sol$pars
           ans$values = tail(sol$values,1)
           return(ans)
         }
-        fval = lapply(as.list(1:5),fun) # repeatation
+        # adding one initial values rho from the last step.
+        fval = lapply(as.list(1:3),fun) # repeatation
         best = sapply(fval,function(x) x$values)
         pars = fval[[which.min(best)]]$pars
       }
@@ -114,7 +116,6 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
   }
   return(list(A=A,rho=rho,l=L[count+1],iteration=count))
 }
-
 
 
 

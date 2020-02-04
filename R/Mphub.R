@@ -15,10 +15,10 @@
 #' \item{iteration}{number of iteration steps used to converge}
 #' @export
 #' @examples
-#' n0 = 5; n=100; T=1000
+#' n0 = 10; n=100; T=1000
 #' A0 = GenA(100,n0,0.4,0.1,rep(0.05,n))
 #' G0 = GenG(A0,T,c(0.2,rep(0.8/n0,n0)))
-#' M = 10; mphub(G0,M,0.045)$rho
+#' M = 15; mphub(G0,M,0.02)$rho
 #' \donttest{M = 20; mphub(G0,M,0.035)}
 #' \donttest{M = 50; mphub(G0,M,0.019)}
 #'

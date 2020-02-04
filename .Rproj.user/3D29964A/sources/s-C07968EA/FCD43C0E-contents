@@ -1,0 +1,121 @@
+---
+title: "STP 598 Hw 1"
+author: "Zhibing He"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Excerise 1
+
+### (a)
+
+The variance of the estimator is $\frac{1}{n_1} + \frac{1}{n_2}$, and we also know that $n_1+n_2=n=15$.
+The following table includes all the possible combinations of $n_1$ and $n_2$, and its corresponding variance.
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+library(dplyr)
+library(kableExtra)
+```
+```{r}
+n1 = 1:14
+n2 = 15-n1
+fx = 1/n1 + 1/n2
+baseline = min(fx)
+out = cbind(n1,n2,round(fx,3),round(baseline/fx,2))
+colnames(out) = c("n1","n2","Variance","Efficiency")
+knitr::kable(out,caption="Estimation precision for different combinations") %>% kable_styling(full_width = F,font_size = 12) %>% row_spec(which(fx==min(fx)),background = "#666",,bold=T)
+```
+
+Thus, the best design is $n_1 = 7, n_2=8$ or $n_1=8, n_2=7$.
+
+### (b)
+
+By solving the following inequation:
+
+$$ \frac{1}{n_1} + \frac{1}{n_2} \leq \frac{1}{7}+\frac{1}{8},$$
+where $n_2 = 2n_1$. Then we have $n_1 \geq 5.6$, and thus we can take $n_1=6,n_2=12$. In this case, $n$ is 18.
+
+## Exercise 2
+
+### (a)
+
+We use the 'maximin' criterion to find the optimal design.
+For any fixed $r$, the optimal design is to minimize 
+
+$$
+\frac{r}{n_1} + \frac{1}{n_2}
+$$
+with the constrain $n_1+n_2=60$. We compare all the possiable combinations for different $r$, then find the design with smallese variance.
+
+```{r}
+x = 1:59
+fx = function(r) r/x + 1/(60-x)
+r = seq(1,4,1)
+out = matrix(NA,length(x),length(r))
+for(i in 1:length(r)) out[,i] = fx(i)
+baseline = apply(out,2,min)
+out1 = round(t(baseline/t(out)),3)
+res = data.frame(n1=x,out1,apply(out1,1,min))
+colnames(res) = c("n1","r=1","r=2","r=3","r=4","min")
+knitr::kable(res) %>% kable_styling(bootstrap_options = c("striped","hover", "condensed"),font_size = 9,full_width = F) %>%  row_spec(which.max(res$min),background = "#666",bold=T)
+```
+Thus, the optimal $n_A$ is 35.
+
+### (b)
+
+#### (b.1)
+
+In this part, we also use the 'maximin' criteria as in part (a).
+In order to solve this problem with continous $r$, we use the numrical simulation to approximate by discretizing the $r$. 
+
+We first euqaily partition the segment $[1,4]$ into $n$ pieces, then explore the relation between the optimal $n_A$ and the partition number $n$.
+
+The process is similar to part (a) except the number of $r$, it includes $n$ points instead of 4.
+The following figure shows the change of optimal $n_A$ with $n$.
+```{r}
+x = 1:59
+fx = function(r) r/x + 1/(60-x)
+L = c(outer(1:9,10^c(1:4)))
+pos = rep(NA,length(L))
+for(i in 1:length(L)){
+  r = seq(1,4,length.out=L[i])
+  out = matrix(NA,length(x),length(r))
+  for(j in 1:length(r)) out[,j] = fx(j)
+  baseline = apply(out,2,min)
+  out1 = round(t(baseline/t(out)),3)
+  res = data.frame(n1=x,out1,apply(out1,1,min))
+  pos[i]=which.max(res[,length(r)+2])
+}
+plot(x=L,y=pos,pch=20,type="l",xlab="n",ylab="Optimal n1",bty="l")
+abline(h=tail(pos,1),lty=2,col="red")
+```
+
+When $n$ goes to infinity, the optimal $n_A$ converges to 45.
+Thus, under the 'maximin' criteria, the optimal $n_A$ should be 45.
+
+#### (b.2)
+
+In this part, we use the assumption that $r \sim \text{unif}(1,4)$.
+Since $r$ is a fixed unknown value, thus the design variance of each combination is also unknown, we plug in the expectation (mean) under uniform distributed $r$.
+
+For each combination, the expectation (mean) of design variance is 
+$$
+\int_{1}^{4} \frac{1}{3}(\frac{r}{n_1}+\frac{1}{60-n1})\text{d}r = \frac{5}{2n_1}+\frac{1}{60-n_1}
+$$
+
+```{r}
+n1 = 1:59
+n2 = 60-n1
+gx = 5/(2*n1) + 1/n2
+baseline = min(gx)
+out = cbind(n1,n2,round(gx,3),round(baseline/gx,2))
+colnames(out) = c("n1","n2","Variance","Efficiency")
+knitr::kable(out,caption="Estimation precision for different combinations") %>% kable_styling(full_width=F,font_size=9) %>% row_spec(which(gx==min(gx)),background = "#666",bold=T)
+```
+
+Thus, under this method, the optimal $n_A$ is 37.
+
+
+
