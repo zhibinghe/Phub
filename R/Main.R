@@ -30,18 +30,20 @@
 phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=1e-4){
   ## f(G(t)|Z(t)=k,A)
   pen.type = match.arg(pen.type)
-  cond.f = function(G,A){
+  posterior = function(G,A,rho){
     T = dim(G)[1]; q = dim(A)[1]
     Pr_cond = matrix(NA,T,q)
     for(t in 1:T) Pr_cond[t,] = apply(t(t(A)^G[t,])*t(t(1-A)^(1-G[t,])),1,prod)
-    return(Pr_cond)
-  }
   ## posterior probability H and loglikelihood
-  posterior = function(rho,Pr_cond){
+    id = which(rowSums(t(t(Pr_cond)*rho))==0)
+    if(length(id)!=0){
+      Pr_cond = Pr_cond[-id,]
+      G = G[-id,] # delete bad smaple points
+    } 
     Htm = t(t(Pr_cond)*rho)
     H = Htm/rowSums(Htm)
     loglike = sum(log(rowSums(Htm)))
-    return(list(H=H,l=loglike))
+    return(list(H=H,l=loglike,G=G))
   }
   ## update rho: some rho will shrink to 0
   if(pen.type=="log"){
@@ -84,6 +86,7 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
         pars = fval[[which.min(best)]]$pars
       }
       pars[pars<tol] = 0
+      pars[1] = 1 - sum(pars[-1]) # sum is 1
       rho[ind] = pars
       return(rho)
     }
@@ -102,19 +105,20 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
   ## EM Iteration
   count = 0;diff = 1
   L = vector();L[1] = 1
-  while(count < iter.max & diff > 0.01){
+  while(count < iter.max & diff > 1e-6){
     count = count + 1
     # E Step
-    post = posterior(rho,cond.f(G,A))
+    post = posterior(G,A,rho)
     H = post$H
+    G = post$G # some rows may be deleted
     L[count+1] = post$l
     if(is.infinite(L[count+1])) break
     # M Step
     rho = hatrho(rho,H)
     A = hatA(G,H)
-    diff = abs(L[count+1]-L[count])
+    diff = abs((L[count+1]-L[count])/L[count+1])
   }
-  return(list(A=A,rho=rho,l=L[count+1],iteration=count))
+  return(list(A=A,rho=rho,l=L[count+1],iter=count))
 }
 
 
