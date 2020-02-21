@@ -35,14 +35,18 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
     Pr_cond = matrix(NA,T,q)
     for(t in 1:T) Pr_cond[t,] = apply(t(t(A)^G[t,])*t(t(1-A)^(1-G[t,])),1,prod)
   ## posterior probability H and loglikelihood
-    id = which(rowSums(t(t(Pr_cond)*rho))==0)
-    if(length(id)!=0){
-      Pr_cond = Pr_cond[-id,]
-      G = G[-id,] # delete bad smaple points
-    } 
-    Htm = t(t(Pr_cond)*rho)
-    H = Htm/rowSums(Htm)
-    loglike = sum(log(rowSums(Htm)))
+    Pr_G = t(t(Pr_cond)*rho)
+    id = which(rowSums(Pr_G)==0)
+    H = matrix(0,T,q)
+    if(length(id)==0){
+      H = Pr_G/rowSums(Pr_G)
+      loglike = sum(log(rowSums(Pr_G)))       
+    }
+    else{
+      H[-id,] = Pr_G[-id,]/rowSums(Pr_G[-id,])
+      H[id,1] = 1
+      loglike = sum(log(rowSums(Pr_G[-id,]))) + sum(t(t(G[id,])*log(A[1,])) + t(t(1-G[id,])*(1-log(A[1,]))))       
+    }
     return(list(H=H,l=loglike,G=G))
   }
   ## update rho: some rho will shrink to 0
