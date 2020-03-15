@@ -1,0 +1,38 @@
+library(forach)
+library(Phub)
+n0 = 20; n=500
+A0 = GenA(n,n0,0.4,0.1,rep(0.05,n))
+G0 = GenG(A0,1000,c(0.2,rep(0.8/n0,n0)))
+M = 80
+# initial A
+A = matrix(NA,M,n)
+for(i in 1:M)A[i,] = colSums(G0[,i]*G0)/sum(G0[,i])
+diag(A) = 1; A = rbind(runif(n),A)
+# initial rho
+rho = c(0.2,rep(0.8/M,M))
+# t2 = phub(G0,A,rho,0.0,pen.type="log")$rho
+t1 = phub(G0,A,rho,0.020,pen.type="plog")
+# cbind(t1,t2)
+
+#  x is the vector of hatrho 
+rm(list=ls())
+load("sl1.RData")
+fun = function(x){
+  tp = sum(which(x!=0) %in% c(2:(n0+1)))
+  fp = sum(x!=0) - tp -1
+  tpr = tp/n0
+  fpr = fp/(M)
+  return(c(tpr,fpr))
+}
+## Aic & Bic
+temp.aic = do.call(rbind,lapply(out,function(x) x[which.max(x[,3]),-c(1,2,3)])) # keep rho0--rhoM
+temp.bic = do.call(rbind,lapply(out,function(x) x[which.max(x[,2]),-c(1,2,3)]))
+temp = t(apply(temp.bic,1,fun))
+colMeans(temp)
+
+lam.aic = do.call(rbind,lapply(out,function(x) x[which.max(x[,3]),1]))
+lam.bic = do.call(rbind,lapply(out,function(x) x[which.max(x[,2]),1]))
+
+
+
+

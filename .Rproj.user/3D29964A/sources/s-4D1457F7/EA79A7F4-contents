@@ -1,47 +1,25 @@
-#' Modified EM algorithm for hub model component selection
-#'
-#' @param G  observed group data, a T*n matrix
-#' @param A  a matrix containg correlation among nodes; first row is the nonleader case
-#' @param rho a vector composed of component weight; prior probability of components.
-#' @param lam tuning parameter for component selection, degenrate to a standard EM without penalty if lam=0
-#' @param pen.type type of penalty, including 'log': penalization for logarithm of all components;
-#' 'plog': penalization for logarithm of partial components, rho0 (nonhub component) is always kept;
-#' 'plasso': penalization for lasso form of partial compents
-#' @param iter.max maximum iteration steps
-#' @param tol threshold for shrinking rho to 0
-
-#' @return a list of components
-#' \item{A}{a matrix containg estimated correlation among nodes}
-#' \item{rho}{a vector containing estimated component weight}
-#' \item{l}{log-likelihood}
-#' \item{iteration}{number of iterations used to converge}
-#' @export
-#' @import Rsolnp
-#' @examples
-#' n0 = 5; n=100; T=1000
-#' A0 = GenA(100,n0,0.4,0.1,rep(0.05,n))
-#' G0 = GenG(A0,T,c(0.2,rep(0.8/n0,n0)))
-#' M = 8
-#' A = matrix(runif((M+1)*n),nrow=(M+1)); diag(A[-1,])=1
-#' rho = runif(M+1); rho = rho/sum(rho)
-#' phub(G0,A,rho,0.035,pen.type="log")$rho
-#' phub(G0,A,rho,0.035,pen.type="plog")$rho
-#' phub(G0,A,rho,0.08,pen.type="plasso")$rho
-phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=1e-4){
+phub.base = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=1e-4){
   ## f(G(t)|Z(t)=k,A)
   pen.type = match.arg(pen.type)
-  cond.f = function(G,A){
+  posterior = function(G,A,rho){
     T = dim(G)[1]; q = dim(A)[1]
     Pr_cond = matrix(NA,T,q)
     for(t in 1:T) Pr_cond[t,] = apply(t(t(A)^G[t,])*t(t(1-A)^(1-G[t,])),1,prod)
-    return(Pr_cond)
-  }
-  ## posterior probability H and loglikelihood
-  posterior = function(rho,Pr_cond){
-    Htm = t(t(Pr_cond)*rho)
-    H = Htm/rowSums(Htm)
-    loglike = sum(log(rowSums(Htm)))
-    return(list(H=H,l=loglike))
+    # posterior probability H and loglikelihood
+    Pr_G = t(t(Pr_cond)*rho)
+    id = which(rowSums(Pr_G)==0)
+    print(id)
+    H = matrix(0,T,q)
+    if(length(id)==0){
+      H = Pr_G/rowSums(Pr_G)
+      loglike = sum(log(rowSums(Pr_G)))       
+    }
+    else{
+      H[-id,] = Pr_G[-id,]/rowSums(Pr_G[-id,])
+      H[id,1] = 1
+      loglike = sum(log(rowSums(Pr_G[-id,]))) + sum(t(t(G[id,])*log(A[1,])) + t(t(1-G[id,])*(1-log(A[1,]))))       
+    }
+    return(list(H=H,l=loglike,G=G))
   }
   ## update rho: some rho will shrink to 0
   if(pen.type=="log"){
@@ -63,7 +41,7 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
         # convex function
         ft = function(t) -sum(Hx[ind]*log(t)) + T*lam*(1-t[1])
         pars = Rsolnp::solnp(pars=rho[ind],fun=ft,eqfun=eqft,eqB=1,LB=rep(0,len),
-                       UB=rep(1,len),control=list(trace=0))$pars
+                             UB=rep(1,len),control=list(trace=0))$pars
       }
       else{
         epsi = 1e-8
@@ -73,7 +51,7 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
           if(i==1) par = rho[ind]
           else {par = runif(len); par = par/sum(par)} # normalized
           sol = Rsolnp::solnp(pars=par,fun=ft,eqfun=eqft,eqB=1,LB=rep(0,len),
-                        UB=rep(1,len),control=list(trace=0))
+                              UB=rep(1,len),control=list(trace=0))
           ans$pars = sol$pars
           ans$values = tail(sol$values,1)
           return(ans)
@@ -84,6 +62,7 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
         pars = fval[[which.min(best)]]$pars
       }
       pars[pars<tol] = 0
+      pars[1] = 1 - sum(pars[-1]) # sum is 1
       rho[ind] = pars
       return(rho)
     }
@@ -102,21 +81,19 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
   ## EM Iteration
   count = 0;diff = 1
   L = vector();L[1] = 1
-  while(count < iter.max & diff > 0.01){
+  while(count < iter.max & diff > 1e-6){
     count = count + 1
     # E Step
-    post = posterior(rho,cond.f(G,A))
+    post = posterior(G,A,rho)
     H = post$H
+    G = post$G # some rows may be deleted
     L[count+1] = post$l
+    cat("count and likelihood:",c(count,tail(L,1)),sep="\n")
     if(is.infinite(L[count+1])) break
     # M Step
     rho = hatrho(rho,H)
     A = hatA(G,H)
-    diff = abs(L[count+1]-L[count])
+    diff = abs((L[count+1]-L[count])/L[count+1])
   }
-  return(list(A=A,rho=rho,l=L[count+1],iteration=count))
+  return(list(A=A,rho=rho,l=L[count+1],iter=count))
 }
-
-
-
-
