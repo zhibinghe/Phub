@@ -32,7 +32,7 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
   ## f(G(t)|Z(t)=k,A)
   pen.type = match.arg(pen.type)
   posterior = function(G,A,rho){
-    T = dim(G)[1]; q = dim(A)[1]
+    T = dim(G)[1]; n = dim(G)[2]; q = dim(A)[1]
     H = Pr_cond = matrix(NA,T,q)
     for(t in 1:T) Pr_cond[t,] = apply(t(t(A)^G[t,])*t(t(1-A)^(1-G[t,])),1,prod)
     ## posterior probability H and loglikelihood
@@ -124,7 +124,7 @@ phub = function(G,A,rho,lam,pen.type=c("plog","plasso","log"),iter.max=1000,tol=
     post = posterior(G,A,rho)
     H = post$H
     L[count+1] = post$l
-    cat("count and likelihood:",c(count,tail(L,1)),sep="\n")
+    #cat("count and likelihood:",c(count,tail(L,1)),sep="\n")
     if(is.infinite(L[count+1])) break
     if(is.na(tail(L,1))) break
     # M Step
