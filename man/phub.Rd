@@ -2,23 +2,30 @@
 % Please edit documentation in R/Main.R
 \name{phub}
 \alias{phub}
-\title{Modified EM algorithm for hub model component selection}
+\title{Modified EM algorithm for hub set selection in hub models with the null component}
 \usage{
-phub(G, A, rho, lam, pen.type = c("plog", "plasso", "log"),
-  iter.max = 1000, tol = 1e-04)
+phub(
+  G,
+  A,
+  rho,
+  lam,
+  pen.type = c("plog", "plasso", "log"),
+  iter.max = 1000,
+  tol = 1e-04
+)
 }
 \arguments{
-\item{G}{observed group data, a T*n matrix}
+\item{G}{observed group data}
 
-\item{A}{a matrix containg correlation among nodes; first row is the nonleader case}
+\item{A}{initial estimate of adjacent matrix, the first row contains the probabilities in non-hub group}
 
-\item{rho}{a vector composed of component weight; prior probability of components.}
+\item{rho}{a vector of hub weight}
 
 \item{lam}{tuning parameter for component selection, degenrate to a standard EM without penalty if lam=0}
 
 \item{pen.type}{type of penalty, including 'log': penalization for logarithm of all components;
-'plog': penalization for logarithm of partial components, rho0 (nonhub component) is always kept;
-'plasso': penalization for lasso form of partial compents}
+'plog': penalization for logarithm of partial components except the null component;
+'plasso': penalization for lasso form of partial components}
 
 \item{iter.max}{maximum iteration steps}
 
@@ -32,17 +39,18 @@ a list of components
 \item{iteration}{number of iterations used to converge}
 }
 \description{
-Modified EM algorithm for hub model component selection
+Modified EM algorithm for hub set selection in hub models with the null component
 }
 \examples{
 set.seed(2020)
 n0 = 5; n=100; T=1000
 A0 = GenA(n,n0,0.4,0.1,rep(0.05,n))
 G0 = GenG(A0,T,c(0.2,rep(0.8/n0,n0)))
-M = 10
-A = matrix(runif((M+1)*n),nrow=(M+1)); diag(A[-1,])=1
+M = 10 
+A = matrix(runif((M+1)*n),nrow=(M+1)); diag(A[-1,]) = 1
 rho = runif(M+1); rho = rho/sum(rho)
 phub(G0,A,rho,0.030,pen.type="log")$rho
 phub(G0,A,rho,0.030,pen.type="plog")$rho
 phub(G0,A,rho,0.8,pen.type="plasso")$rho
+
 }

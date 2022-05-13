@@ -2,26 +2,26 @@
 % Please edit documentation in R/Generation.R
 \name{GenA}
 \alias{GenA}
-\title{Simulate a simple pattern 'Adjacent matrix'}
+\title{Generate a simple pattern adjacent matrix \eqn{A}}
 \usage{
 GenA(n, n0, pf, pr, pi)
 }
 \arguments{
 \item{n}{number of nodes}
 
-\item{n0}{number of true nonzero components}
+\item{n0}{number of hub nodes}
 
-\item{pf}{probability of following}
+\item{pf}{\eqn{A_{ij}} if node j in the follower set of hub i}
 
-\item{pr}{probality of rejection}
+\item{pr}{\eqn{A_{ij}} if node j does not belong to the follower set of hub i}
 
-\item{pi}{a n-dimensional vector containg the probability of appearance in nonleader group}
+\item{pi}{a n-dimensional vector containing probability of appearance in non-hub group}
 }
 \value{
-a (n0+1)*n matrix; the first row is \code{pi}
+a (n0+1)*n matrix, the first row is \code{pi}
 }
 \description{
-Simulate a simple pattern 'Adjacent matrix'
+Generate a simple pattern adjacent matrix \eqn{A}
 }
 \examples{
 pi = rep(0.05,100)

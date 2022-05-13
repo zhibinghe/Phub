@@ -2,6 +2,7 @@
 
 export(GenA)
 export(GenG)
+export(data.hub)
 export(mphub)
 export(phub)
 import(Rsolnp)

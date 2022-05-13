@@ -1,0 +1,90 @@
+#### Data Analysis
+library(foreach)
+library(Phub)
+library(readxl)
+set.seed(2021)
+##
+
+path = "/Users/hzb/Dropbox/Penalized Hub Model/Numerical Study/Real Data"
+fpath = paste(path, "/Extended Bakery Dataset",sep="")
+#fpath = paste(path, "/jester Joke Rating",sep="")
+setwd(fpath)
+####
+data = read.csv("5000-out2.csv",header=FALSE); data = data[,-1]
+#data = read_excel("jester-data-1_translated_reduced.xlsx",col_names=FALSE)
+#data = read.csv("bird_full.csv")
+colnames(data) = paste("X",1:ncol(data),sep="")
+G0 = as.matrix(data)
+n = ncol(data)
+T = nrow(data)
+M = 40 # M = 50
+A = matrix(NA,M,n)
+for(i in 1:M)A[i,] = colSums(G0[,i]*G0)/sum(G0[,i])
+diag(A) = 1; A = rbind(runif(n),A)
+rho = c(0.2,rep(0.8/M,M))
+Lam = seq(0.015,0.035,0.005) # Extended Bakery data
+
+#########################################
+#### Bootstrap
+boot = function(dta,lam,M,r=10){
+  out=matrix(0,r,M)
+  coef = matrix(0,r,M)
+  for(i in 1:r){
+    ddta = dta[sample(1:T,T,replace=T),]
+    model = phub(G0,A,rho,lam,pen.type="plog")
+    out[i,(which(model$rho!=0)-1)] = 1
+    coef[i,] = as.vector(model$rho)[-1] 
+  }
+  return(coef)
+  #return(colSums(out))
+}
+# parallel computing
+c = 3 # number of cpu cores
+cl = parallel::makeCluster(c)
+doParallel::registerDoParallel(cl)
+#Lam = seq(0.045,0.065,by=0.005)
+# .combine=rbind
+res = foreach::foreach(lam = Lam,.packages="Phub") %dopar% {
+  boot(lam,dta=G0,M=M)
+} 
+parallel::stopCluster(cl)
+# 
+rho1 = colMeans(res[[1]])
+names(rho1) = paste("X",1:length(rho1),sep="")
+freq = colSums(G0)/sum(G0)
+#############################################
+#### full data analysis
+full.sele = function(lam) {
+  model = phub(G0,A,rho,lam,pen.type="plog")
+  model$rho
+}
+out.full  = foreach::foreach(lam=Lam,.packages="Phub") %dopar% full.sele(lam)
+xx = lapply(out.full,function(x) (which(x != 0)-1)[-1] )
+names(xx) = Lam
+###################
+library(ggplot2)
+#
+df = data.frame(
+  group = rep(c("Bootstrap","Frequency"),each=5),
+  Bird = paste("X",rep(tail(order(rho1),5),2),sep=""),
+  value = c(rho1[tail(order(rho1),5)],freq[tail(order(rho1),5)]))
+df$Bird = factor(df$Bird,levels=rev(df$Bird[1:5]))
+ggplot(df, aes(fill=df$group, y=df$value, x=df$Bird)) + 
+  geom_bar(position="dodge",stat="identity")+
+  labs(x="Bird",y="Selection Proportion (Frequency)", fill=NULL,
+  title="Top 5 components for bootstrap selection proportion")
+  #+theme(legend.position = "none")
+#
+df2 = data.frame(
+  group = rep(c("Bootstrap","Frequency"),each=5),
+  Bird = paste("X",rep(tail(order(freq),6)[-3],2),sep=""),
+  value = c(rho1[tail(order(freq),6)[-3]],freq[tail(order(freq),6)[-3]]))
+df2$Bird = factor(df2$Bird,levels=rev(df2$Bird[1:5]))
+ggplot(df, aes(fill=df2$group, y=df2$value, x=df2$Bird)) + 
+  geom_bar(position="dodge",stat="identity")+
+  labs(x="Bird",y="Selection Proportion (Frequency)", fill=NULL,
+       title="Top 5 components for occurrence frequency")
+
+###########################
+rowid = which(rowSums(data) == 1)
+length(rowid)/nrow(data)

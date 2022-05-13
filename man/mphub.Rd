@@ -4,21 +4,28 @@
 \alias{mphub}
 \title{\code{\link{phub}} with multiple initial points, both \code{A} and \code{rho} are randomly drawn from Unif(0,1)}
 \usage{
-mphub(G, M, lam, rep = 10, pen.type = c("plog", "plasso", "log"),
-  iter.max = 1000, tol = 1e-04)
+mphub(
+  G,
+  M,
+  lam,
+  rep = 10,
+  pen.type = c("plog", "plasso", "log"),
+  iter.max = 1000,
+  tol = 1e-04
+)
 }
 \arguments{
-\item{G}{observed group data, a T*n matrix}
+\item{G}{observed group data}
 
-\item{M}{initial user-specifed number of components}
+\item{M}{user-specified number of components}
 
 \item{lam}{tuning parameter for component selection, degenrate to a standard EM without penalty if lam=0}
 
-\item{rep}{repeatation times}
+\item{rep}{number of repetition}
 
 \item{pen.type}{type of penalty, including 'log': penalization for logarithm of all components;
-'plog': penalization for logarithm of partial components, rho0 (nonhub component) is always kept;
-'plasso': penalization for lasso form of partial compents}
+'plog': penalization for logarithm of partial components except the null component;
+'plasso': penalization for lasso form of partial components}
 
 \item{iter.max}{maximum iteration steps}
 
@@ -26,10 +33,10 @@ mphub(G, M, lam, rep = 10, pen.type = c("plog", "plasso", "log"),
 }
 \value{
 a list of components
-\item{A}{M*n matrix containg estimated correlation among nodes}
-\item{rho}{M-dimensional vector containing estimated component weight}
-\item{l}{loglikelihood}
-\item{iteration}{number of iteration steps used to converge}
+\item{A}{M*n matrix containg correlation among nodes}
+\item{rho}{M-dimensional vector containing estimated hub weights}
+\item{l}{log-likelihood}
+\item{iteration}{number of iterations to converge}
 }
 \description{
 \code{\link{phub}} with multiple initial points, both \code{A} and \code{rho} are randomly drawn from Unif(0,1)

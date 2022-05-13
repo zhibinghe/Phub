@@ -2,30 +2,27 @@
 % Please edit documentation in R/Generation.R
 \name{GenG}
 \alias{GenG}
-\title{Simulate grouped data}
+\title{Generate grouped data \eqn{G}}
 \usage{
 GenG(A, T, rho)
 }
 \arguments{
 \item{A}{(n0+1)*n-dimensional adjacent matrix}
 
-\item{T}{number of observations}
+\item{T}{number of observations (groups)}
 
-\item{rho}{a (n0+1) dimensional vector containing component(hub) weight}
+\item{rho}{a (n0+1) dimensional vector containing hub weight}
 }
 \value{
-\code{T}*n matrix
+T*n matrix
 }
 \description{
-Simulate grouped data
+Generate grouped data \eqn{G}
 }
 \examples{
-n0 = 5
-A0 = GenA(100,n0,0.4,0.1,rep(0.05,100))
+n = 100; n0 = 5; T = 1000
+A0 = GenA(n,n0,0.4,0.1,rep(0.05,100))
 rho = c(0.2,rep(0.8/n0,n0))
-G0 = GenG(A0,1000,rho)
+G0 = GenG(A0,T,rho)
 
-}
-\seealso{
-\code{\link{GenA}}
 }
