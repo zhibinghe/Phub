@@ -24,7 +24,7 @@ Data Analysis using penalized hub model
 \examples{
 data(bakery5000)
 Lam = seq(0.015,0.035,0.005)
-data.hub(bakery5000,40,Lam,0)
-data.hub(bakery5000,40,Lam,100)
+data.hub(bakery5000,40,Lam,0) # full data
+data.hub(bakery5000,40,Lam,2) # bootstrapped data
   
 }

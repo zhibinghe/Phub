@@ -10,7 +10,7 @@ A data frame with 5000 rows (transactions) and 50 variables (items):
   \item{cakes}{F1--F10 belong to cakes}
   \item{tarts}{F11--F20 belong to tarts}
   \item{cookies}{F21--F30 belong to coolies}
-  \item{pastries}{F31-40 belong to pastries}
+  \item{pastries}{F31--40 belong to pastries}
   \item{drinks}{D1--D10 belong to drinks}
 }
 }
