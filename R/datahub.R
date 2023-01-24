@@ -33,7 +33,7 @@ data.hub = function(data,M,Lam,bootstrap=0){
     else{
       out = matrix(0,bootstrap,M+1)
       for(j in 1:bootstrap){
-        sub = data[sample(1:T,T,replace=T),]
+        sub = data[sample(1:nrow(data),nrow(data),replace=T),]
         out[j,] = (phub(sub,A,rho,Lam[i],pen.type="plog")$rho > 0) + 0 
       }
       coef[i,] = colMeans(out)
